@@ -69,13 +69,10 @@ function image.draw(img, x, y)
 
             local newDrawPos
             local drawSize = 0
-            local oldColor = tbl[drawPos]
             for i = drawPos, #tbl do
-                local color = tbl[i]
-                
                 drawSize = drawSize + 1
-                if color ~= oldColor or i == #tbl then
-                    gpu.setBackground(color)
+                if i == #tbl or tbl[i] ~= tbl[i + 1] then
+                    gpu.setBackground(tbl[i])
                     newDrawPos = i + 1
                     break
                 end
