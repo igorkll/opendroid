@@ -63,25 +63,25 @@ local image = {}
 
 function image.draw(img, x, y)
     for cy, tbl in ipairs(img) do
-        local oldColor
         local drawPos = 1
         while true do
             local drawSize = 0
-            if drawPos == #tbl then break end
+            if drawPos > #tbl then break end
 
             local newDrawPos
+            local oldColor = tbl[drawPos]
             for i = drawPos, #tbl do
                 local color = tbl[i]
-
+                
                 drawSize = drawSize + 1
-                if color ~= oldColor or not oldColor or i == #tbl then
+                if color ~= oldColor or i == #tbl then
                     gpu.setBackground(color)
                     oldColor = color
-                    newDrawPos = i
+                    newDrawPos = i + 1
                     break
                 end
             end
-            gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+            gpu.set((drawPos + x) - 1, (cy + y) - 1, (tostring(math.floor(math.random(0, 9)))):rep(drawSize))
             drawPos = newDrawPos
         end
     end
