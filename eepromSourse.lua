@@ -1,9 +1,16 @@
 -----------------graphic init
 
-local gpu = component.proxy(component.list("gpu")())
+gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.list("screen")(), true)
 gpu.setDepth(4)
-colors = {
+
+local package = {}
+package.loaded = {package = package}
+function require(name)
+    return 
+end
+
+local colorsArray = { --computercraft colors
     white     = 0xF0F0F0,
     orange    = 0xF2B233,
     magenta   = 0xE57FD8,
@@ -21,6 +28,10 @@ colors = {
     red       = 0xCC4C4C,
     black     = 0x191919
 }
+
+local function refreshPalette()
+    setmetatable(colors, {__})
+end
 
 local function menu(label, strs, funcs)
     
