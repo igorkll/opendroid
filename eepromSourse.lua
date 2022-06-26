@@ -60,6 +60,7 @@ end, __index = function(_, key)
     return colorsArray[key]
 end})
 
+package.loaded.colorsIndexs = colorsIndexs
 package.loaded.colors = colors
 
 ----------------------------------image lib
@@ -77,7 +78,10 @@ function image.draw(img, x, y)
             for i = drawPos, #str do
                 drawSize = drawSize + 1
                 if i == #str or str:byte(i) ~= str:byte(i) then
-                    gpu.setBackground(str:byte(i))
+                    local col = tonumber(str:sub(i, i), 16)
+                    if col then
+                        gpu.setBackground(colorsIndexs[col + 1])
+                    end
                     newDrawPos = i + 1
                     break
                 end
@@ -163,7 +167,7 @@ local function menu(label, strs, funcs, img)
         gpu.set(1, 1, label)
         for i, v in ipairs(strs) do
             local str = v .. (" "):rep(rx - #v)
-            drawText(1, i + 1, colors.yellow, i ~= num, str)
+            drawText(1, i + 1, colors.lightBlue, i ~= num, str)
         end
 
         computer.pullSignal()
