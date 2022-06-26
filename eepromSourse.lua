@@ -132,6 +132,7 @@ package.loaded.image = image
 -----------------
 
 local function menu(label, strs, funcs, img)
+    local num = 1
     while 1 do
         gpu.setBackground(colors.black)
         gpu.fill(1, 1, rx, ry, " ")
@@ -155,6 +156,13 @@ local function menu(label, strs, funcs, img)
                 end
                 gpu.set(x, y, str:sub(i, i))
             end
+        end
+
+        gpu.setForeground(colors.yellow)
+        gpu.setBackground(colors.black)
+        gpu.set(1, 1, "Opendroid Recovery")
+        for i, v in ipairs(strs) do
+            drawText(1, i + 1, colors.yellow, i == num, v)
         end
     end
 end
