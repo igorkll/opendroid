@@ -160,11 +160,19 @@ local function menu(label, strs, funcs, img)
 
         gpu.setForeground(colors.yellow)
         gpu.setBackground(colors.black)
-        gpu.set(1, 1, "Opendroid Recovery")
+        gpu.set(1, 1, label)
         for i, v in ipairs(strs) do
-            drawText(1, i + 1, colors.yellow, i == num, v)
+            local str = v .. (" "):rep(rx - #v)
+            drawText(1, i + 1, colors.yellow, i ~= num, str)
         end
+
+        computer.pullSignal()
     end
 end
+menu("Opendroid Recovery", {"asdasd123", "aaa"}, {function()
+    computer.beep(2000)
+end, function()
+    computer.beep(1000)
+end}, image.images.recoveryLogo)
 
 -----------------
