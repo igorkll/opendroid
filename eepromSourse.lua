@@ -68,17 +68,21 @@ function image.draw(img, x, y)
         while true do
             local drawSize = 0
             if drawPos == #tbl then break end
+
+            local newDrawPos
             for i = drawPos, #tbl do
                 local color = tbl[i]
 
                 drawSize = drawSize + 1
-                if (color ~= oldColor or not oldColor) or i == #tbl then
+                if color ~= oldColor or not oldColor or i == #tbl then
                     gpu.setBackground(color)
                     oldColor = color
+                    newDrawPos = i
                     break
                 end
             end
             gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+            drawPos = newDrawPos
         end
     end
 end
