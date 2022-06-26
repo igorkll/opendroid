@@ -69,7 +69,7 @@ local image = {}
 function image.draw(img, x, y)
     for cy, str in ipairs(img) do
         local drawPos = 1
-        while true do
+        while 1 do
             if drawPos > #str then break end
 
             local newDrawPos
@@ -132,10 +132,31 @@ package.loaded.image = image
 -----------------
 
 local function menu(label, strs, funcs, img)
-    gpu.setBackground(colors.black)
-    gpu.fill(1, 1, rx, ry, " ")
-    local ix, iy = image.getSize(img)
-    image.draw(img, ((rx / 2) - ))
+    while 1 do
+        gpu.setBackground(colors.black)
+        gpu.fill(1, 1, rx, ry, " ")
+        local ix, iy = image.getSize(img)
+        image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)))
+
+        local function drawText(x, y, color, useForeground, str)
+            if useForeground then
+                gpu.setForeground(color)
+            else
+                gpu.setBackground(color)
+            end
+            for i = 1, #str do
+                local x = x + (i - 1)
+
+                local oldColor = ({gpu.get(x, y)})[useForeground and 3 or 2] --select длинее чем это решения
+                if useForeground then
+                    gpu.setBackground(oldColor)
+                else
+                    gpu.setForeground(oldColor)
+                end
+                gpu.set(x, y, str:sub(i, i))
+            end
+        end
+    end
 end
 
 -----------------
