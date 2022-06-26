@@ -11,6 +11,7 @@ end
 local gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.list("screen")(), true)
 gpu.setDepth(4)
+local rx, ry = gpu.getResolution()
 
 -----------------package init
 
@@ -87,6 +88,10 @@ function image.draw(img, x, y)
     end
 end
 
+function image.getSize(img)
+    return #img[1], #img
+end
+
 image.images = {}
 image.images.osLogo =
 {
@@ -101,22 +106,36 @@ image.images.osLogo =
 }
 image.images.recoveryLogo =
 {
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    ""
+    "       555     ",
+    " DDDDDD5555D4D ",
+    " D94449555555D ",
+    " D4F1F4555555D ",
+    " D41114555555D ",
+    " D94449555555D ",
+    " DDDDDD5555D4D ",
+    "       555     "
+}
+image.images.errorImage =
+{
+    "               ",
+    "         44    ",
+    "00E0     1F4   ",
+    "0EE00E   114CCC",
+    "0E00E0E  114CCC",
+    "  0E0E011114CCC",
+    "   0E0044444CCC",
+    "       4CCCCCCC",
 }
 
 package.loaded.image = image
 
 -----------------
 
-local function menu(label, strs, funcs)
-    
+local function menu(label, strs, funcs, img)
+    gpu.setBackground(colors.black)
+    gpu.fill(1, 1, rx, ry, " ")
+    local ix, iy = image.getSize(img)
+    image.draw(img, ((rx / 2) - ))
 end
 
 -----------------
