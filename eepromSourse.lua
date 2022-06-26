@@ -67,7 +67,6 @@ function image.draw(img, x, y)
         local drawPos = 1
         while true do
             local drawSize = 0
-            if drawPos == #tbl then break end
             for i = drawPos, #tbl do
                 drawSize = drawSize + 1
                 if tbl[i] ~= oldColor or i == #tbl then
@@ -76,6 +75,7 @@ function image.draw(img, x, y)
                     break
                 end
             end
+            if drawPos == #tbl then break end
             gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
         end
     end
