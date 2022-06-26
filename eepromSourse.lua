@@ -4,11 +4,15 @@ gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.list("screen")(), true)
 gpu.setDepth(4)
 
+-----------------package init
+
 local package = {}
 package.loaded = {package = package}
 function require(name)
-    return 
+    return package.loaded[name]
 end
+
+-----------------colors lib init
 
 local colorsArray = { --computercraft colors
     white     = 0xF0F0F0,
@@ -29,9 +33,23 @@ local colorsArray = { --computercraft colors
     black     = 0x191919
 }
 
-local function refreshPalette()
-    setmetatable(colors, {__})
+local colorsIndexs = {}
+
+local count = 0
+for k, v in pairs(colorsArray) do
+    gpu.setPaletteColor(count, v)
+    colorsIndexs[k] = v
+    count = count + 1
 end
+
+package.loaded.colors = setmetatable({}, {__newindex = function(self, key, value)
+    if key and value and colorsArray[key] then
+        colorsArray[key] = value
+        gpu.setPaletteColor(colorsIndexs[key], value)
+    end
+end})
+
+-----------------
 
 local function menu(label, strs, funcs)
     
