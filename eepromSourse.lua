@@ -50,38 +50,66 @@ for k, v in pairs(colorsArray) do
     count = count + 1
 end
 
-package.loaded.colors = setmetatable({}, {__newindex = function(self, key, value)
+local colors = setmetatable({}, {__newindex = function(self, key, value)
     if key and value and colorsArray[key] then
         colorsArray[key] = value
         gpu.setPaletteColor(colorsIndexs[key], value)
     end
+end, __index = function(_, key)
+    return colorsArray[key]
 end})
+
+package.loaded.colors = colors
 
 ----------------------------------image lib
 
 local image = {}
 
 function image.draw(img, x, y)
-    for cy, tbl in ipairs(img) do
+    for cy, str in ipairs(img) do
         local drawPos = 1
         while true do
-            if drawPos > #tbl then break end
+            if drawPos > #str then break end
 
             local newDrawPos
             local drawSize = 0
-            for i = drawPos, #tbl do
+            for i = drawPos, #str do
                 drawSize = drawSize + 1
-                if i == #tbl or tbl[i] ~= tbl[i + 1] then
-                    gpu.setBackground(tbl[i])
+                if i == #str or str:byte(i) ~= str:byte(i) then
+                    gpu.setBackground(str:byte(i))
                     newDrawPos = i + 1
                     break
                 end
             end
-            gpu.set((drawPos + x) - 1, (cy + y) - 1, (tostring(math.floor(math.random(0, 9)))):rep(drawSize))
+            gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
             drawPos = newDrawPos
         end
     end
 end
+
+image.images = {}
+image.images.osLogo =
+{
+    "     4444     ",
+    "   44111144   ",
+    " 441F1111F144 ",
+    "4111F1111F1114",
+    "41111111111114",
+    " 4411111F1144 ",
+    "   441FF144   ",
+    "     4444     "
+}
+image.images.recoveryLogo =
+{
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+}
 
 package.loaded.image = image
 
