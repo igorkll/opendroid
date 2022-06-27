@@ -173,49 +173,40 @@ local function menu(label, strs, funcs, img)
         local ix, iy = image.getSize(img)
         image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)))
 
-        local function drawText(x, y, color, useForeground, str)
-            if useForeground then
-                gpu.setForeground(color)
-            else
-                gpu.setBackground(color)
-            end
-            for i = 1, #str do
-                local x = x + (i - 1)
-
-                local oldColor = ({gpu.get(x, y)})[useForeground and 3 or 2] --select длинее чем это решения
-                if useForeground then
-                    gpu.setBackground(oldColor)
-                else
-                    gpu.setForeground(oldColor)
-                end
-                gpu.set(x, y, str:sub(i, i))
-            end
-        end
-
-        gpu.setForeground(colors.yellow)
+        gpu.setForeground(colors.red)
         gpu.setBackground(colors.black)
         gpu.set(1, 1, label)
+        gpu.setForeground(colors.lightBlue)
+        gpu.fill(1, 2, rx, 1, "-")
         for i, v in ipairs(strs) do
             local str = v .. (" "):rep(rx - #v)
             if i == num then
-                gpu.setForeground(colors.lightBlue)
-                gpu.setBackground(colors.black)
-            else
-                gpu.setForeground(colors.white)
                 gpu.setBackground(colors.lightBlue)
+                gpu.setForeground(colors.white)
+            else
+                gpu.setBackground(colors.black)
+                gpu.setForeground(colors.lightBlue)
             end
-            gpu.set(1, i + 1, str)
+            gpu.set(1, i + 2, str)
         end
     end
 
+    draw()
     while 1 do
-        computer.pullSignal()
+        local eventData = {computer.pullSignal()}
     end
 end
-menu("Opendroid Recovery", {"asdasd123", "aaa"}, {function()
-    computer.beep(2000)
-end, function()
-    computer.beep(1000)
-end}, image.images.recoveryLogo)
+
+local strs = {}
+local funcs = {}
+
+for i = 20, 2000, 100 do
+    table.insert(strs, tostring(i))
+    table.insert(funcs, function()
+        computer.beep(i, 0.01)
+    end)
+end
+
+menu("Opendroid Recovery", strs, funcs, image.images.recoveryLogo)
 
 -----------------
