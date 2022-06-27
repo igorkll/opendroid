@@ -232,4 +232,13 @@ end
 clear()
 drawImageInCenter(image.images.osLogo)
 
-menu("Opendroid Recovery", strs, funcs, image.images.recoveryLogo)
+local inTime = computer.uptime()
+while computer.uptime() - inTime < 1 do
+    local eventData = {computer.pullSignal(0.1)}
+    if eventData[1] == "key_down" and eventData[4] == 56 then
+        menu("Opendroid Recovery", strs, funcs, image.images.recoveryLogo)
+        break
+    end
+end
+
+local deviceinfo = computer.getDeviceInfo()
