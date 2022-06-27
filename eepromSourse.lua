@@ -119,6 +119,8 @@ function image.draw(img, x, y)
             drawPos = newDrawPos
         end
     end
+    gpu.setBackground(colors.black)
+    gpu.setForeground(colors.white)
 end
 
 function image.getSize(img)
@@ -166,6 +168,7 @@ package.loaded.image = image
 
 local function clear()
     gpu.setBackground(colors.black)
+    gpu.setForeground(colors.white)
     gpu.fill(1, 1, rx, ry, " ")
 end
 
@@ -232,13 +235,23 @@ end
 clear()
 drawImageInCenter(image.images.osLogo)
 
-local deviceinfo = computer.getDeviceInfo()
-local bootdevice
+local deviceinfo, oldSlot, bootdevice = computer.getDeviceInfo(), math.huge
 for address in component.list("filesystem") do
-    
+    local slot = component.slot(address)
+    if deviceinfo[address].clock and deviceinfo[address].clock ~= "20/20/20" and slot >= 0 and slot < oldSlot then
+        oldSlot = slot
+        bootdevice = address
+    end
 end
-
 deviceinfo = nil
+
+if not bootdevice then
+    clear()
+    drawImageInCenter(image.images.errorImage)
+    gpu.setForeground(colors.red)
+    gpu.set(1, ry, "Fatal Error: no internal HDD found")
+    while 1 do end
+end
 
 local inTime = computer.uptime()
 while computer.uptime() - inTime < 1 do
