@@ -41,13 +41,28 @@ local colorsArray = { --computercraft colors
     red       = 0xCC4C4C,
     black     = 0x191919
 }
+local indexColors = {
+    colorsArray.white,
+    colorsArray.orange,
+    colorsArray.magenta,
+    colorsArray.lightBlue,
+    colorsArray.yellow,
+    colorsArray.lime,
+    colorsArray.pink,
+    colorsArray.gray,
+    colorsArray.lightGray,
+    colorsArray.cyan,
+    colorsArray.purple,
+    colorsArray.blue,
+    colorsArray.brown,
+    colorsArray.green,
+    colorsArray.red,
+    colorsArray.black,
+}
+local colorsIds = {}
 
-local colorsIndexs = {}
-local indexColors = {}
-
-local count = 0
-for k, v in pairs(colorsArray) do
-    gpu.setPaletteColor(count, v)
+for i, v in ipairs(indexColors) do
+    gpu.setPaletteColor(i, v)
     colorsIndexs[k] = count
     count = count + 1
     indexColors[count] = v
@@ -63,6 +78,7 @@ end, __index = function(_, key)
 end})
 
 package.loaded.indexColors = indexColors
+package.loaded.colorsIds = colorsIds
 package.loaded.colors = colors
 
 ----------------------------------image lib
