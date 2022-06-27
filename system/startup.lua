@@ -74,13 +74,49 @@ package.loaded.paths = parts
 
 ----------------------------------
 
-local getters = {}
+local simpleIO = {}
 
-package.loaded.paths = parts
+function simpleIO.getFile(fs, path)
+    local file, err = fs.open(path, "rb")
+    if not file then return nil, err end
+    local buffer = ""
+    while true do
+        local data = fs.read(file, math.huge)
+        if not data then break end
+        buffer = buffer .. data
+    end
+    fs.close(file)
+    return buffer
+end
+
+function simpleIO.saveFile(fs, path, data)
+    local file, err = fs.open(path, "wb")
+    if not file then return nil, err end
+    fs.write(path, data)
+    fs.close(file)
+    return true
+end
+
+package.loaded.simpleIO = simpleIO
 
 ----------------------------------
 
+local sandbox = {}
 
-table.insert(package.loaders, function()
+function sandbox.createSandbox(key)
     
+end
+
+package.loaded.sandbox = sandbox
+
+----------------------------------
+
+table.insert(package.loaders, function(name)
+    local path = parts.concat("/system/libs", name)
+    if bootfs.exists(path) then
+        local data = simpleIO.getFile(path)
+        if data then
+            return load(data, "=" .. path, )
+        end
+    end
 end)
