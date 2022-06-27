@@ -177,7 +177,8 @@ local function menu(label, strs, funcs, img)
         gpu.setBackground(colors.black)
         gpu.set(1, 1, label)
         gpu.setForeground(colors.lightBlue)
-        gpu.fill(1, 2, rx, 1, "-")
+        gpu.fill(1, 2, rx, 1, "─")
+        gpu.fill(1, 3 + #strs, rx, 1, "─")
         for i, v in ipairs(strs) do
             if i == num then
                 gpu.setBackground(colors.lightBlue)
