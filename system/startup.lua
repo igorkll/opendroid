@@ -281,11 +281,11 @@ package.loaded.sandbox = sandbox
 ----------------------------------
 
 table.insert(package.loaders, function(name)
-    local path = parts.concat("/system/libs", name)
+    local path = parts.concat("/system/libs", name .. ".lua")
     if bootfs.exists(path) then
         local data = simpleIO.getFile(path)
         if data then
-            return load(data, "=" .. path, )
+            return load(data, "=" .. path, nil, sandbox.createSandbox(systemKey))
         end
     end
 end)
