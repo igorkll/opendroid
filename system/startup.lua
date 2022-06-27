@@ -101,10 +101,26 @@ package.loaded.simpleIO = simpleIO
 
 ----------------------------------
 
+local function systemKey()
+end
+
+----------------
+
 local sandbox = {}
 
 function sandbox.createSandbox(key)
-    
+    local env, globals = {}, {}
+    if key == systemKey then
+        globals
+    elseif key == nil then
+
+    else
+        error("this key is not found", 0)
+    end
+    setmetatable(env, {__index = function(_, key)
+        return globals[key]
+    end})
+    return env, globals
 end
 
 package.loaded.sandbox = sandbox
