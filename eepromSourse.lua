@@ -162,16 +162,26 @@ image.images.errorImage =
 
 package.loaded.image = image
 
------------------
+-----------------gui
+
+local function clear()
+    gpu.setBackground(colors.black)
+    gpu.fill(1, 1, rx, ry, " ")
+end
+
+local function drawImageInCenter(img)
+    local ix, iy = image.getSize(img)
+    image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)))
+end
 
 local function menu(label, strs, funcs, img)
     local num = 1
 
     local function draw()
-        gpu.setBackground(colors.black)
-        gpu.fill(1, 1, rx, ry, " ")
-        local ix, iy = image.getSize(img)
-        image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)))
+        clear()
+        if img then
+            drawImageInCenter(img)
+        end
 
         gpu.setForeground(colors.red)
         gpu.setBackground(colors.black)
@@ -217,16 +227,9 @@ local function menu(label, strs, funcs, img)
     end
 end
 
-local strs = {}
-local funcs = {}
+-----------------main
 
-for i = 20, 2000, 100 do
-    table.insert(strs, tostring(i))
-    table.insert(funcs, function()
-        computer.beep(i, 0.01)
-    end)
-end
+clear()
+drawImageInCenter(image.images.osLogo)
 
 menu("Opendroid Recovery", strs, funcs, image.images.recoveryLogo)
-
------------------
