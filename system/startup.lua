@@ -109,18 +109,43 @@ end
 local sandbox = {}
 
 function sandbox.createSandbox(key)
-    local env, globals = {}, {}
+    local env = {}
+    env._G = env
+
     if key == systemKey then
-        globals
+        env.assert = assert
+        env.error = error
+        env.getmetatable = getmetatable
+        env.setmetatable = setmetatable
+        env.ipairs = ipairs
+        env.pairs = pairs
+        env.load = load
+        env.next = next
+        env.select = select
+        env.pcall = pcall
+        env.xpcall = xpcall
+        env.rawequal = rawequal
+        env.rawget = rawget
+        env.rawset = rawset
+        env.tonumber = tonumber
+        env.tostring = tostring
+        env.type = type
+
+        env.table = table
+        env.unicode = unicode
+        env.string = string
+        env.string = string
+         
+         
+         
+         
     elseif key == nil then
 
     else
         error("this key is not found", 0)
     end
-    setmetatable(env, {__index = function(_, key)
-        return globals[key]
-    end})
-    return env, globals
+
+    return env
 end
 
 package.loaded.sandbox = sandbox
