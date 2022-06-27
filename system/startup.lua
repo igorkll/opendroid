@@ -268,14 +268,11 @@ function sandbox.createSandbox(key)
         env.debug = debug
         env.os = os
     elseif key == nil then
-        env.table = tprotect.protect(table)
-        env.unicode = tprotect.protect(unicode)
-        env.string = tprotect.protect(string)
-        --env.coroutine = tprotect.protect(coroutine)
-        --env.debug = tprotect.protect(debug)
-        env.utf8 = tprotect.protect(utf8)
-        env.math = tprotect.protect(math)
-        --env.os = tprotect.protect(os)
+        for k, v in pairs(env) do
+            if type(v) == "table" then
+                env[k] = tprotect.protect(k)
+            end
+        end
     else
         error("this key is not found", 0)
     end
