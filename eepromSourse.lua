@@ -62,16 +62,21 @@ local indexColors = {
 local colorsIds = {}
 
 for i, v in ipairs(indexColors) do
-    gpu.setPaletteColor(i, v)
-    colorsIndexs[k] = count
-    count = count + 1
-    indexColors[count] = v
+    gpu.setPaletteColor(i - 1, v)
+    local k
+    for k2, v2 in pairs(colorsArray) do
+        if v == v2 then
+            k = k2
+            break
+        end
+    end
+    colorsIds[k] = i
 end
 
 local colors = setmetatable({}, {__newindex = function(self, key, value)
     if key and value and colorsArray[key] then
         colorsArray[key] = value
-        gpu.setPaletteColor(colorsIndexs[key], value)
+        gpu.setPaletteColor(colorsIds[key], value)
     end
 end, __index = function(_, key)
     return colorsArray[key]
@@ -101,7 +106,7 @@ function image.draw(img, x, y)
                     local col = tonumber(str:sub(i, i), 16)
                     newDrawPos = i + 1
                     if col then
-                        gpu.setBackground(indexColors[col])
+                        gpu.setBackground(indexColors[col + 1])
                     else
                         notSet = true
                     end
