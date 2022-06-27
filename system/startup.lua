@@ -253,7 +253,32 @@ function sandbox.createSandbox(key)
 
         env.fatalError = fatalError
     elseif key == nil then
+        env.assert = assert
+        env.error = error
+        env.getmetatable = getmetatable
+        env.setmetatable = setmetatable
+        env.ipairs = ipairs
+        env.pairs = pairs
+        env.load = load
+        env.next = next
+        env.select = select
+        env.pcall = pcall
+        env.xpcall = xpcall
+        env.rawequal = rawequal
+        env.rawget = rawget
+        env.rawset = rawset
+        env.tonumber = tonumber
+        env.tostring = tostring
+        env.type = type
 
+        env.table = tprotect.protect(table)
+        env.unicode = tprotect.protect(unicode)
+        env.string = tprotect.protect(string)
+        env.coroutine = tprotect.protect(coroutine)
+
+        env.require = require
+
+        env.fatalError = fatalError
     else
         error("this key is not found", 0)
     end
