@@ -250,7 +250,7 @@ if not bootdevice then
     drawImageInCenter(image.images.errorImage)
     gpu.setForeground(colors.red)
     gpu.set(1, ry, "Fatal Error: no internal HDD found")
-    while 1 do end
+    while 1 do computer.pullSignal() end
 end
 
 local inTime = computer.uptime()
@@ -259,9 +259,22 @@ while computer.uptime() - inTime < 1 do
     if eventData[1] == "key_down" and eventData[4] == 56 then
         menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "power down"},
         {function()
-            computer.shutdown()
+            computer.shutdown(true)
         end, function()
-            bootdevice.remove("data")
+            local strs = {}
+            local funcs = {}
+            for i = 1, 8 do
+                table.insert(strs, "no")
+                table.insert(funcs, false)
+            end
+            table.insert(strs, "no")
+            table.insert(funcs, function() bootdevice.remove("data") end)
+            for i = 1, 3 do
+                table.insert(strs, "no")
+                table.insert(funcs, false)
+            end
+
+            menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
         end, computer.shutdown}, image.images.recoveryLogo)
         break
     end
