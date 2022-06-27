@@ -166,7 +166,8 @@ package.loaded.image = image
 
 local function menu(label, strs, funcs, img)
     local num = 1
-    while 1 do
+
+    local function draw()
         gpu.setBackground(colors.black)
         gpu.fill(1, 1, rx, ry, " ")
         local ix, iy = image.getSize(img)
@@ -196,9 +197,18 @@ local function menu(label, strs, funcs, img)
         gpu.set(1, 1, label)
         for i, v in ipairs(strs) do
             local str = v .. (" "):rep(rx - #v)
-            drawText(1, i + 1, colors.lightBlue, i ~= num, str)
+            if i == num then
+                gpu.setForeground(colors.lightBlue)
+                gpu.setBackground(colors.black)
+            else
+                gpu.setForeground(colors.white)
+                gpu.setBackground(colors.lightBlue)
+            end
+            gpu.set(1, i + 1, str)
         end
+    end
 
+    while 1 do
         computer.pullSignal()
     end
 end
