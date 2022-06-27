@@ -213,7 +213,9 @@ local function menu(label, strs, funcs, img)
                 if not funcs[num] then
                     return
                 end
-                funcs[num]()
+                if funcs[num]() then
+                    break
+                end
                 draw()
             elseif eventData[4] == 200 then
                 if num > 1 then
@@ -245,12 +247,16 @@ for address in component.list("filesystem") do
 end
 deviceinfo = nil
 
-if not bootdevice then
+local function fatalError(str)
     clear()
     drawImageInCenter(image.images.errorImage)
     gpu.setForeground(colors.red)
-    gpu.set(1, ry, "Fatal Error: no internal HDD found")
+    gpu.set(1, ry, str)
     while 1 do computer.pullSignal() end
+end
+
+if not bootdevice then
+    fatalError("Hardware Error: no internal HDD found")
 end
 
 local inTime = computer.uptime()
@@ -267,8 +273,11 @@ while computer.uptime() - inTime < 1 do
                 table.insert(strs, "no")
                 table.insert(funcs, false)
             end
-            table.insert(strs, "no")
-            table.insert(funcs, function() bootdevice.remove("data") end)
+            table.insert(strs, "yes")
+            table.insert(funcs, function()
+                bootdevice.remove("data")
+                return true
+            end)
             for i = 1, 3 do
                 table.insert(strs, "no")
                 table.insert(funcs, false)
@@ -280,3 +289,20 @@ while computer.uptime() - inTime < 1 do
     end
 end
 
+if not bootdevice.exists("/system/startup.lua") then
+    fatalError("System Error: not found file startup.lua")
+end
+
+local file, buffer = assert(bootdevice.open("/system/startup.lua", "rb")), ""
+while true do
+    local data = bootdevice.read(file, math.huge)
+    if not data then break end
+    buffer = buffer .. data
+end
+bootdevice.close(file)
+
+local code, err = load(buffer, "=startup")
+if not code then
+    fatalError("System Error: " .. err)
+end
+code()
