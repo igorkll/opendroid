@@ -240,7 +240,7 @@ for address in component.list("filesystem") do
     local slot = component.slot(address)
     if deviceinfo[address].clock and deviceinfo[address].clock ~= "20/20/20" and slot >= 0 and slot < oldSlot then
         oldSlot = slot
-        bootdevice = address
+        bootdevice = component.proxy(address)
     end
 end
 deviceinfo = nil
@@ -257,7 +257,12 @@ local inTime = computer.uptime()
 while computer.uptime() - inTime < 1 do
     local eventData = {computer.pullSignal(0.1)}
     if eventData[1] == "key_down" and eventData[4] == 56 then
-        menu("Opendroid Recovery", strs, funcs, image.images.recoveryLogo)
+        menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "power down"},
+        {function()
+            computer.shutdown()
+        end, function()
+            bootdevice.remove("data")
+        end, computer.shutdown}, image.images.recoveryLogo)
         break
     end
 end
