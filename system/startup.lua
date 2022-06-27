@@ -157,6 +157,15 @@ function parts.xconcat(...)
     return parts.canonical(table.concat(set, "/"))
 end
 
+function parts.sconcat(main, ...)
+    main = parts.canonical(main)
+    local path = parts.concat(main, ...)
+    if unicode.sub(path, 1, unicode.len(main)) == main then
+        return path
+    end
+    return false
+end
+
 function parts.canonical(path)
     local result = table.concat(parts.segments(path), "/")
     if unicode.sub(path, 1, 1) == "/" then
@@ -255,7 +264,15 @@ function sandbox.createSandbox(key)
 
     env._VERSION = _VERSION
 
-    if key == systemKey then
+    local createTime = computer.uptime()
+
+    env.app = {}
+    function env.app.uptime()
+        return computer.uptime() - createTime
+    end
+    env.app.key = key
+
+    if key == systemKey then --system
         env.computer = computer
         env.component = component
         env.fatalError = fatalError
@@ -263,7 +280,9 @@ function sandbox.createSandbox(key)
         env.coroutine = coroutine
         env.debug = debug
         env.os = os
-    elseif key == nil then
+
+        env.app.createTime = createTime
+    elseif key == true then --sandbox
         for k, v in pairs(env) do
             if type(v) == "table" then
                 env[k] = tprotect.protect(k)
@@ -281,11 +300,13 @@ package.loaded.sandbox = sandbox
 ----------------------------------
 
 table.insert(package.loaders, function(name)
-    local path = parts.concat("/system/libs", name .. ".lua")
-    if bootfs.exists(path) then
+    local path = parts.sconcat("/system/libs", name .. ".lua")
+    if path and bootfs.exists(path) then
         local data = simpleIO.getFile(path)
         if data then
-            return load(data, "=" .. path, nil, sandbox.createSandbox(systemKey))
+            local env = sandbox.createSandbox(systemKey)
+            env.app.path = path
+            return load(data, "=" .. path, nil, env)
         end
     end
 end)
