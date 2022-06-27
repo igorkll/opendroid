@@ -234,17 +234,21 @@ function sandbox.createSandbox(key)
         env.select = select
         env.pcall = pcall
         env.xpcall = xpcall
-        env.rawequal = rawequal
-        env.rawget = rawget
-        env.rawset = rawset
         env.tonumber = tonumber
         env.tostring = tostring
         env.type = type
+
+        env.rawequal = rawequal
+        env.rawget = rawget
+        env.rawset = rawset
+        env.rawlen = rawlen
 
         env.table = table
         env.unicode = unicode
         env.string = string
         env.coroutine = coroutine
+        env.debug = debug
+        env.utf8 = utf8
 
         env.computer = computer
         env.component = component
@@ -252,6 +256,8 @@ function sandbox.createSandbox(key)
         env.require = require
 
         env.fatalError = fatalError
+
+        env._VERSION = _VERSION
     elseif key == nil then
         env.assert = assert
         env.error = error
