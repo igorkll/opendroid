@@ -70,10 +70,15 @@ function parts.name(path)
     return parts[#parts]
 end
   
+package.loaded.paths = parts
 
 ----------------------------------
 
+local getters = {}
+
 package.loaded.paths = parts
+
+----------------------------------
 
 
 table.insert(package.loaders, function()
