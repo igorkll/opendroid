@@ -43,12 +43,14 @@ local colorsArray = { --computercraft colors
 }
 
 local colorsIndexs = {}
+local indexColors = {}
 
 local count = 0
 for k, v in pairs(colorsArray) do
     gpu.setPaletteColor(count, v)
-    colorsIndexs[k] = v
+    colorsIndexs[k] = count
     count = count + 1
+    indexColors[count] = v
 end
 
 local colors = setmetatable({}, {__newindex = function(self, key, value)
@@ -60,7 +62,7 @@ end, __index = function(_, key)
     return colorsArray[key]
 end})
 
-package.loaded.colorsIndexs = colorsIndexs
+package.loaded.indexColors = indexColors
 package.loaded.colors = colors
 
 ----------------------------------image lib
@@ -68,25 +70,31 @@ package.loaded.colors = colors
 local image = {}
 
 function image.draw(img, x, y)
+    local oldColor = gpu.getBackground()
     for cy, str in ipairs(img) do
         local drawPos = 1
         while 1 do
             if drawPos > #str then break end
 
             local newDrawPos
+            local notSet
             local drawSize = 0
             for i = drawPos, #str do
                 drawSize = drawSize + 1
-                if i == #str or str:byte(i) ~= str:byte(i) then
+                if i == #str or str:byte(i) ~= str:byte(i + 1) then
                     local col = tonumber(str:sub(i, i), 16)
-                    if col then
-                        gpu.setBackground(colorsIndexs[col + 1])
-                    end
                     newDrawPos = i + 1
+                    if col then
+                        gpu.setBackground(indexColors[col])
+                    else
+                        notSet = true
+                    end
                     break
                 end
             end
-            gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+            if not notSet then
+                gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+            end
             drawPos = newDrawPos
         end
     end
