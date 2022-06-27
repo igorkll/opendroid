@@ -232,6 +232,14 @@ end
 clear()
 drawImageInCenter(image.images.osLogo)
 
+local deviceinfo = computer.getDeviceInfo()
+local bootdevice
+for address in component.list("filesystem") do
+    
+end
+
+deviceinfo = nil
+
 local inTime = computer.uptime()
 while computer.uptime() - inTime < 1 do
     local eventData = {computer.pullSignal(0.1)}
@@ -241,4 +249,3 @@ while computer.uptime() - inTime < 1 do
     end
 end
 
-local deviceinfo = computer.getDeviceInfo()
