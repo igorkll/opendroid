@@ -213,6 +213,10 @@ local tprotect = tprotect_t
 
 ----------------------------------
 
+
+
+----------------------------------
+
 local sandbox = {}
 
 local function systemKey()
@@ -222,69 +226,56 @@ function sandbox.createSandbox(key)
     local env = {}
     env._G = env
 
+    env.assert = assert
+    env.error = error
+    env.getmetatable = getmetatable
+    env.setmetatable = setmetatable
+    env.ipairs = ipairs
+    env.pairs = pairs
+    env.load = load
+    env.next = next
+    env.select = select
+    env.pcall = pcall
+    env.xpcall = xpcall
+    env.tonumber = tonumber
+    env.tostring = tostring
+    env.type = type
+
+    env.rawequal = rawequal
+    env.rawget = rawget
+    env.rawset = rawset
+    env.rawlen = rawlen
+
+    env.table = table
+    env.unicode = unicode
+    env.string = string
+    --env.coroutine = coroutine
+    --env.debug = debug
+    env.utf8 = utf8
+    env.math = math
+    --env.os = os
+
+    env.require = require
+
+    env._VERSION = _VERSION
+
     if key == systemKey then
-        env.assert = assert
-        env.error = error
-        env.getmetatable = getmetatable
-        env.setmetatable = setmetatable
-        env.ipairs = ipairs
-        env.pairs = pairs
-        env.load = load
-        env.next = next
-        env.select = select
-        env.pcall = pcall
-        env.xpcall = xpcall
-        env.tonumber = tonumber
-        env.tostring = tostring
-        env.type = type
-
-        env.rawequal = rawequal
-        env.rawget = rawget
-        env.rawset = rawset
-        env.rawlen = rawlen
-
-        env.table = table
-        env.unicode = unicode
-        env.string = string
-        env.coroutine = coroutine
-        env.debug = debug
-        env.utf8 = utf8
-
         env.computer = computer
         env.component = component
-
-        env.require = require
-
         env.fatalError = fatalError
 
-        env._VERSION = _VERSION
+        env.coroutine = coroutine
+        env.debug = debug
+        env.os = os
     elseif key == nil then
-        env.assert = assert
-        env.error = error
-        env.getmetatable = getmetatable
-        env.setmetatable = setmetatable
-        env.ipairs = ipairs
-        env.pairs = pairs
-        env.load = load
-        env.next = next
-        env.select = select
-        env.pcall = pcall
-        env.xpcall = xpcall
-        env.rawequal = rawequal
-        env.rawget = rawget
-        env.rawset = rawset
-        env.tonumber = tonumber
-        env.tostring = tostring
-        env.type = type
-
         env.table = tprotect.protect(table)
         env.unicode = tprotect.protect(unicode)
         env.string = tprotect.protect(string)
-        env.coroutine = tprotect.protect(coroutine)
-
-        env.require = require
-
-        env.fatalError = fatalError
+        --env.coroutine = tprotect.protect(coroutine)
+        --env.debug = tprotect.protect(debug)
+        env.utf8 = tprotect.protect(utf8)
+        env.math = tprotect.protect(math)
+        --env.os = tprotect.protect(os)
     else
         error("this key is not found", 0)
     end
