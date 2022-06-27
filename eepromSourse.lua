@@ -247,7 +247,7 @@ for address in component.list("filesystem") do
 end
 deviceinfo = nil
 
-local function fatalError(str)
+function fatalError(str)
     clear()
     drawImageInCenter(image.images.errorImage)
     gpu.setForeground(colors.red)
@@ -305,4 +305,9 @@ local code, err = load(buffer, "=startup")
 if not code then
     fatalError("System Error: " .. err)
 end
+
+function computer.getBootAddress(address)
+    return bootdevice.address
+end
+
 code()
