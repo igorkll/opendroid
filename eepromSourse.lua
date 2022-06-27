@@ -179,21 +179,40 @@ local function menu(label, strs, funcs, img)
         gpu.setForeground(colors.lightBlue)
         gpu.fill(1, 2, rx, 1, "-")
         for i, v in ipairs(strs) do
-            local str = v .. (" "):rep(rx - #v)
             if i == num then
                 gpu.setBackground(colors.lightBlue)
                 gpu.setForeground(colors.white)
+                v = v .. (" "):rep(rx - #v)
             else
                 gpu.setBackground(colors.black)
                 gpu.setForeground(colors.lightBlue)
             end
-            gpu.set(1, i + 2, str)
+            gpu.set(1, i + 2, v)
         end
     end
 
     draw()
     while 1 do
         local eventData = {computer.pullSignal()}
+        if eventData[1] == "key_down" then
+            if eventData[4] == 28 then
+                if not funcs[num] then
+                    return
+                end
+                funcs[num]()
+                draw()
+            elseif eventData[4] == 200 then
+                if num > 1 then
+                    num = num - 1
+                    draw()
+                end
+            elseif eventData[4] == 208 then
+                if num < #strs then
+                    num = num + 1
+                    draw()
+                end
+            end
+        end
     end
 end
 
