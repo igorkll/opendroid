@@ -16,10 +16,10 @@ local rx, ry = gpu.getResolution()
 -----------------package init
 
 local package = {}
-package.loaded = {package = package, libLoaders = {}}
+package.loaded = {package = package, loaders = {}}
 function require(name)
     if not package.loaded[name] then
-        for i, v in ipairs(package.libLoaders) do
+        for i, v in ipairs(package.loaders) do
             package.loaded[name] = v(name)
             if package.loaded[name] then break end
         end
