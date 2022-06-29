@@ -298,7 +298,7 @@ while computer.uptime() - inTime < 1 do
 
             menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
         end, function()
-            local strs
+            local strs = {"no logs found"}
             if bootdevice.exists("data/logs/bootErrors.log") then
                 local file = bootdevice.open("data/logs/bootErrors.log", "rb")
                 if file then
@@ -318,6 +318,7 @@ while computer.uptime() - inTime < 1 do
                 end
             end
 
+            local num = 1
             local function draw()
                 clear()
 
@@ -330,7 +331,13 @@ while computer.uptime() - inTime < 1 do
             while 1 do
                 local eventData = {computer.pullSignal()}
                 if eventData[1] == "key_down" then
-                    
+                    if eventData[4] == 42 then
+                        break
+                    elseif eventData[4] == 200 then
+                        if num > 1 then num = num - 1 draw() end
+                    elseif eventData[4] == 208 then
+                        if num < #strs then num = num + 1 draw() end
+                    end
                 end
             end
         end, computer.shutdown}, image.images.recoveryLogo)
