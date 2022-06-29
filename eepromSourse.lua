@@ -310,7 +310,7 @@ while computer.uptime() - inTime < 1 do
                         filedata = filedata .. data
                     end
                     bootdevice.close(file)
-                    
+
                     strs = {}
                     while 1 do
                         local mainData, endFlag = ""
@@ -318,7 +318,7 @@ while computer.uptime() - inTime < 1 do
                             local data = unicode.sub(filedata, filenum, filenum)
                             filenum = filenum + 1
 
-                            if not data then endFlag = 1 break end
+                            if #data == 0 then endFlag = 1 break end
                             if data == "\n" then break end
                             mainData = mainData .. data
                         end
