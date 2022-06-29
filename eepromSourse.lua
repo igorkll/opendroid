@@ -8,8 +8,8 @@ end
 
 -----------------graphic init
 
-local gpu = component.proxy(component.list("gpu")())
-gpu.bind(component.list("screen")(), true)
+local gpu = component.proxy(component.list"gpu"())
+gpu.bind(component.list"screen"(), true)
 gpu.setDepth(4)
 local rx, ry = gpu.getResolution()
 
@@ -113,7 +113,7 @@ function image.draw(img, x, y, customSet)
                     if col then
                         gpu.setBackground(indexColors[col + 1])
                     else
-                        notSet = true
+                        notSet = 1
                     end
                     break
                 end
@@ -248,17 +248,17 @@ end
 
 clear()
 drawImageInCenter(image.images.osLogo)
-computer.beep(150, 0.1)
+computer.beep(150, .1)
 
 local deviceinfo, oldSlot, bootdevice = computer.getDeviceInfo(), math.huge
-for address in component.list("filesystem") do
+for address in component.list"filesystem" do
     local slot = component.slot(address)
     if deviceinfo[address].clock and deviceinfo[address].clock ~= "20/20/20" and slot >= 0 and slot < oldSlot then
         oldSlot = slot
         bootdevice = component.proxy(address)
     end
 end
-deviceinfo = nil
+deviceinfo = N
 
 function fatalError(str)
     clear()
@@ -269,12 +269,12 @@ function fatalError(str)
 end
 
 if not bootdevice then
-    fatalError("Hardware Error: no internal HDD found")
+    fatalError"Hardware Error: no internal HDD found"
 end
 
 local inTime = computer.uptime()
 while computer.uptime() - inTime < 1 do
-    local eventData = {computer.pullSignal(0.1)}
+    local eventData = {computer.pullSignal(.1)}
     if eventData[1] == "key_down" and eventData[4] == 56 then
         menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "view recovery logs", "power down"},
         {function()
@@ -288,7 +288,7 @@ while computer.uptime() - inTime < 1 do
             end
             table.insert(strs, "yes")
             table.insert(funcs, function()
-                bootdevice.remove("data")
+                bootdevice.remove"data"
                 return 1
             end)
             for i = 1, 3 do
@@ -299,7 +299,7 @@ while computer.uptime() - inTime < 1 do
             menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
         end, function()
             local strs = {"no logs found"}
-            if bootdevice.exists("data/logs/bootErrors.log") then
+            if bootdevice.exists"data/logs/bootErrors.log" then
                 local file = bootdevice.open("data/logs/bootErrors.log", "rb")
                 if file then
                     strs = {}
@@ -323,7 +323,10 @@ while computer.uptime() - inTime < 1 do
                 clear()
 
                 for i, v in ipairs(strs) do
-                    
+                    local posY = i - num
+                    if posY > 0 and posY < ry then
+                        gpu.set(1, math.floor((ry / 2) + .5), strs[i])
+                    end
                 end
 
                 drawImageInCenter(image.images.errorImage, 1)
@@ -345,7 +348,7 @@ while computer.uptime() - inTime < 1 do
     end
 end
 
-bootdevice.makeDirectory("data/logs")
+bootdevice.makeDirectory"data/logs"
 
 local function addErrToLog(err)
     local file = bootdevice.open("data/logs/bootErrors.log", "ab")
@@ -355,13 +358,13 @@ local function addErrToLog(err)
     end
 end
 
-if not bootdevice.exists("system/startup.lua") then
-    addErrToLog("System Error: not found file startup.lua")
+if not bootdevice.exists"system/startup.lua" then
+    addErrToLog"System Error: not found file startup.lua"
     computer.shutdown(1)
 end
 
 local file, buffer = assert(bootdevice.open("system/startup.lua", "rb")), ""
-while true do
+while 1 do
     local data = bootdevice.read(file, math.huge)
     if not data then break end
     buffer = buffer .. data
