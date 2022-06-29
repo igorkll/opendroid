@@ -97,19 +97,17 @@ package.loaded.colors = colors
 local image = {}
 
 function image.draw(img, x, y, customSet)
-    if not customSet then customSet = gpu.set end
     local oldColor = gpu.getBackground()
     for cy, str in ipairs(img) do
         local drawPos = 1
         while 1 do
             if drawPos > #str then break end
 
-            local newDrawPos
-            local notSet
-            local drawSize = 0
+            local drawSize, newDrawPos, notSet = 0
+
             for i = drawPos, #str do
                 drawSize = drawSize + 1
-                if i == #str or str:byte(i) ~= str:byte(i + 1) then
+                if customSet or i == #str or str:byte(i) ~= str:byte(i + 1) then
                     local col = tonumber(str:sub(i, i), 16)
                     newDrawPos = i + 1
                     if col then
@@ -121,7 +119,13 @@ function image.draw(img, x, y, customSet)
                 end
             end
             if not notSet then
-                customSet((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+                if customSet then
+                    local oldChar, oldFore, oldBack = gpu.get(x, y)
+                    gpu.setForeground(oldFore)
+                    gpu.set((drawPos + x) - 1, (cy + y) - 1, oldChar)
+                else
+                    gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+                end
             end
             drawPos = newDrawPos
         end
@@ -179,13 +183,9 @@ local function clear()
     gpu.fill(1, 1, rx, ry, " ")
 end
 
-local function drawImageInCenter(img)
+local function drawImageInCenter(img, customSet)
     local ix, iy = image.getSize(img)
-    image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)), function(x, y, char)
-        local oldChar, oldFore, oldBack = gpu.get(x, y)
-        gpu.setForeground(oldFore)
-        gpu.set(x, y, oldChar)
-    end)
+    image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)), customSet)
 end
 
 local function menu(label, strs, funcs, img)
@@ -278,7 +278,7 @@ while computer.uptime() - inTime < 1 do
     if eventData[1] == "key_down" and eventData[4] == 56 then
         menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "view recovery logs", "power down"},
         {function()
-            computer.shutdown(true)
+            computer.shutdown(1)
         end, function()
             local strs = {}
             local funcs = {}
@@ -289,7 +289,7 @@ while computer.uptime() - inTime < 1 do
             table.insert(strs, "yes")
             table.insert(funcs, function()
                 bootdevice.remove("data")
-                return true
+                return 1
             end)
             for i = 1, 3 do
                 table.insert(strs, "no")
@@ -298,7 +298,41 @@ while computer.uptime() - inTime < 1 do
 
             menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
         end, function()
-            
+            local strs
+            if bootdevice.exists("data/logs/bootErrors.log") then
+                local file = bootdevice.open("data/logs/bootErrors.log", "rb")
+                if file then
+                    strs = {}
+                    while 1 do
+                        local mainData = ""
+                        while 1 do
+                            local data = bootdevice.read(file, 1)
+                            if not data then goto exit end
+                            if data == "\n" then break end
+                            mainData = mainData .. data
+                        end
+                        table.insert(strs, mainData)
+                    end
+                    ::exit::
+                    bootdevice.close(file)
+                end
+            end
+
+            local function draw()
+                clear()
+
+                for i, v in ipairs(strs) do
+                    
+                end
+
+                drawImageInCenter(image.images.errorImage, 1)
+            end
+            while 1 do
+                local eventData = {computer.pullSignal()}
+                if eventData[1] == "key_down" then
+                    
+                end
+            end
         end, computer.shutdown}, image.images.recoveryLogo)
         break
     end
