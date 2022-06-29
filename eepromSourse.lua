@@ -303,21 +303,21 @@ while computer.uptime() - inTime < 1 do
             if bootdevice.exists"data/logs/bootErrors.log" then
                 local file = bootdevice.open("data/logs/bootErrors.log", "rb")
                 if file then
-                    local filedata = ""
+                    local filedata, filenum = "", 1
                     while 1 do
                         local data = bootdevice.read(file, math.huge)
                         if not data then break end
                         filedata = filedata .. data
                     end
-                    bootdevice.read(file)
-
+                    bootdevice.close(file)
+                    
                     strs = {}
                     while 1 do
                         local mainData, endFlag = ""
-                        for i = 1, math.huge do
-                            local data = unicode.sub(filedata, 1, 1)
-                            filedata = unicode.sub(filedata, 1, unicode.len(filedata) - 1)
-                            
+                        while 1 do
+                            local data = unicode.sub(filedata, filenum, filenum)
+                            filenum = filenum + 1
+
                             if not data then endFlag = 1 break end
                             if data == "\n" then break end
                             mainData = mainData .. data
