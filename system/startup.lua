@@ -3,10 +3,6 @@ local package = require("package")
 
 ----------------------------------
 
-local executeApp, loadApp
-
-----------------------------------
-
 --взято с форума computer craft - https://computercraft.ru/topic/2518-zaschitnik-tablits-tprotect/?tab=comments#comment-37169
 --надеюсь штучька надежная так как нужна она мне для сирьезных вешей
 
@@ -232,41 +228,11 @@ local function systemKey()
 end
 
 function sandbox.createSandbox(key)
-    local env = {}
-    env._G = env
-
-    env.assert = assert
-    env.error = error
-    env.getmetatable = getmetatable
-    env.setmetatable = setmetatable
-    env.ipairs = ipairs
-    env.pairs = pairs
-    env.load = load
-    env.next = next
-    env.select = select
-    env.pcall = pcall
-    env.xpcall = xpcall
-    env.tonumber = tonumber
-    env.tostring = tostring
-    env.type = type
-
-    env.rawequal = rawequal
-    env.rawget = rawget
-    env.rawset = rawset
-    env.rawlen = rawlen
-
-    env.table = table
-    env.unicode = unicode
-    env.string = string
-    --env.coroutine = coroutine
-    --env.debug = debug
-    env.utf8 = utf8
-    env.math = math
-    --env.os = os
+    local globals = {}
 
     env.require = require
 
-    env._VERSION = _VERSION
+    
 
     local createTime = computer.uptime()
 
@@ -288,12 +254,43 @@ function sandbox.createSandbox(key)
         env.os = os
 
         env.app.createTime = createTime
-
         env.loadApp = loadApp
+        env.bootfs = bootfs
     elseif key == true then --sandbox
+        env.assert = assert
+        env.error = error
+        env.getmetatable = getmetatable
+        env.setmetatable = setmetatable
+        env.ipairs = ipairs
+        env.pairs = pairs
+        env.load = load
+        env.next = next
+        env.select = select
+        env.pcall = pcall
+        env.xpcall = xpcall
+        env.tonumber = tonumber
+        env.tostring = tostring
+        env.type = type
+
+        env.rawequal = rawequal
+        env.rawget = rawget
+        env.rawset = rawset
+        env.rawlen = rawlen
+
+        env.table = table
+        env.unicode = unicode
+        env.string = string
+        --env.coroutine = coroutine
+        --env.debug = debug
+        env.utf8 = utf8
+        env.math = math
+        --env.os = os
+
+        env._VERSION = _VERSION
+
         env.require = function(name)
             if name ~= "package" then
-                return require(name)
+                return tprotect.protect(require(name))
             end
         end
         for k, v in pairs(env) do
@@ -341,10 +338,12 @@ end)
 ----------------------------------executing
 
 function loadApp(name, key)
-    if isUnsupportedChars(name) then --системма антихакер
+    --системма антихакер
+    if isUnsupportedChars(name) then
         return nil, "the name contains unsupported characters"
     end
 
+    --упровления путем
     local path
     local function checkPath(lpath)
         if bootfs.exists(lpath) then
@@ -359,20 +358,26 @@ function loadApp(name, key)
             
         end
     end
-
     if not path then
         return nil, "application is not found"
     end
 
-    if key == nil and isSystem then
-        key = systemKey
+    --работа с ключем песочьницы
+    if key == nil then
+        if isSystem then
+            key = systemKey
+        else
+            key = true
+        end
     end
 
+    --обработка песочьницы
     local env = sandbox.createSandbox(key)
     if key == systemKey then
         env.app.path = path
     end
 
+    --получения исполняемого файла приложения
     local data = simpleIO.getFile(bootfs, path)
     local code = load(data, "=" .. path, nil, env)
 

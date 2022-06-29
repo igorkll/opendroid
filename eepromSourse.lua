@@ -16,7 +16,8 @@ local rx, ry = gpu.getResolution()
 -----------------package init
 
 local package = {}
-package.loaded = {package = package, loaders = {}}
+package.loaded = {package = package}
+package.loaders = {}
 function require(name)
     if not package.loaded[name] then
         for i, v in ipairs(package.loaders) do
@@ -194,6 +195,9 @@ local function menu(label, strs, funcs, img)
 
     local function draw()
         clear()
+        if img then
+            drawImageInCenter(img)
+        end
 
         gpu.setForeground(colors.red)
         gpu.setBackground(colors.black)
@@ -211,10 +215,6 @@ local function menu(label, strs, funcs, img)
                 gpu.setForeground(colors.lightBlue)
             end
             gpu.set(1, i + 2, v)
-        end
-
-        if img then
-            drawImageInCenter(img)
         end
     end
 
@@ -335,7 +335,7 @@ while computer.uptime() - inTime < 1 do
 
                 for i, v in ipairs(strs) do
                     local posY = math.floor((ry / 2) + .5) + (i - num)
-                    if posY > 0 and posY < ry then
+                    if posY > 0 and posY <= ry then
                         gpu.setForeground(colors.lightBlue)
                         gpu.set(1, posY, strs[i])
                     end
