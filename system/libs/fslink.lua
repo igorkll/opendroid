@@ -14,12 +14,14 @@ function fslink.link(fs, path, maxOpen, size)
     local vfs = {}
 
     vfs.open = function(path, mode)
+        if fileCount >= maxOpen then return nil, "bad file descriptor" end
         local file, err = fs.open(fslink.repath(path), mode)
         if file then
             local closed
             fileCount = fileCount + 1
 
             local obj = {}
+
             function obj.read(readCount)
                 if closed then return end
                 return fs.read(file, readCount)
