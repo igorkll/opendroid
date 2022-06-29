@@ -322,7 +322,7 @@ while computer.uptime() - inTime < 1 do
                             if data == "\n" then break end
                             mainData = mainData .. data
                         end
-                        if #mainData > 0 then table.insert(strs, mainData) end
+                        if #mainData > 0 then table.insert(strs, 1, mainData) end
                         if endFlag then break end
                     end
                     bootdevice.close(file)
