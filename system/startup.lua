@@ -266,7 +266,7 @@ function sandbox.createSandbox(key)
 
     local createTime = computer.uptime()
 
-    env.app = {}
+    env.app = {data = {}}
     function env.app.uptime()
         return computer.uptime() - createTime
     end
@@ -283,6 +283,11 @@ function sandbox.createSandbox(key)
 
         env.app.createTime = createTime
     elseif key == true then --sandbox
+        env.require = function(name)
+            if name ~= "package" then
+                return require(name)
+            end
+        end
         for k, v in pairs(env) do
             if type(v) == "table" then
                 env[k] = tprotect.protect(k)
@@ -300,13 +305,28 @@ package.loaded.sandbox = sandbox
 ----------------------------------
 
 table.insert(package.loaders, function(name)
-    local path = parts.sconcat("/system/libs", name .. ".lua")
-    if path and bootfs.exists(path) then
-        local data = simpleIO.getFile(path)
-        if data then
-            local env = sandbox.createSandbox(systemKey)
-            env.app.path = path
-            return load(data, "=" .. path, nil, env)
+    if not name:find("%.") and not name:find("%\\") and not name:find("%/") then
+        local path = parts.sconcat("/system/libs", name .. ".lua")
+        if path and bootfs.exists(path) then
+            local data = simpleIO.getFile(path)
+            if data then
+                local env = sandbox.createSandbox(systemKey)
+                env.app.path = path
+                if name == "keys" then
+                    env.app.data.keys.systemKey = systemKey
+                    env.app.data.keys.appKey = true
+                end
+                return load(data, "=" .. path, nil, env)
+            end
         end
     end
 end)
+
+----------------------------------executing
+
+local function execute(name, key, ...)
+    if name == "finder" then
+        key = systemKey --принудительно даем права системмы
+    end
+    local env = sandbox.createSandbox(key)
+end

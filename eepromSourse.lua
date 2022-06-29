@@ -242,6 +242,7 @@ end
 
 clear()
 drawImageInCenter(image.images.osLogo)
+computer.beep(1000, 0.2)
 
 local deviceinfo, oldSlot, bootdevice = computer.getDeviceInfo(), math.huge
 for address in component.list("filesystem") do
