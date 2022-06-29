@@ -302,10 +302,16 @@ end
 
 package.loaded.sandbox = sandbox
 
+----------------------------------functions
+
+local function isUnsupportedChars(data)
+    return data:find("%.") or data:find("%\\") or data:find("%/")
+end
+
 ----------------------------------
 
 table.insert(package.loaders, function(name)
-    if not name:find("%.") and not name:find("%\\") and not name:find("%/") then
+    if not isUnsupportedChars(name) then
         local path = parts.sconcat("/system/libs", name .. ".lua")
         if path and bootfs.exists(path) then
             local data = simpleIO.getFile(path)
@@ -325,11 +331,29 @@ end)
 ----------------------------------executing
 
 local function execute(name, key, ...)
+    if isUnsupportedChars(name) then --системма антихакер
+        return nil, "the name contains unsupported characters"
+    end
+
     if name == "finder" then
         key = systemKey --принудительно даем права системмы
     end
     local env = sandbox.createSandbox(key)
-    local code = load()
-    
+
+    local path
+    local function checkPath(lpath)
+        if bootfs.exists(lpath) then
+            path = lpath
+            return true
+        end
+    end
+    if not checkPath(parts.concat("/system/apps", name, "main.lua")) then
+        if not checkPath(parts.concat("/data/apps", name, "main.lua")) then
+            
+        end
+    end
+
+    local data = simpleIO.getFile(bootfs, path)
+    local code = load(data, "=" .. path, nil, env)
     return pcall(code, ...)
 end
