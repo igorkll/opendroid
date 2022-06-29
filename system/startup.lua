@@ -318,10 +318,12 @@ table.insert(package.loaders, function(name)
             if data then
                 local env = sandbox.createSandbox(systemKey)
                 env.app.path = path
+
                 if name == "keys" then
                     env.app.data.keys.systemKey = systemKey
                     env.app.data.keys.appKey = true
                 end
+                
                 return load(data, "=" .. path, nil, env)
             end
         end
@@ -359,6 +361,9 @@ local function execute(name, key, ...)
     end
 
     local env = sandbox.createSandbox(key)
+    if key == systemKey then
+        env.app.path = path
+    end
 
     local data = simpleIO.getFile(bootfs, path)
     local code = load(data, "=" .. path, nil, env)
