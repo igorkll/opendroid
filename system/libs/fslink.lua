@@ -23,21 +23,21 @@ function fslink.link(fs, path, maxOpen, size)
             local obj = {}
 
             function obj.read(readCount)
-                if closed then return end
+                if closed then return nil, "too many open handles" end
                 return fs.read(file, readCount)
             end
             function obj.write(data)
-                if closed then return end
+                if closed then return nil, "too many open handles" end
                 return fs.write(file, data)
             end
             function obj.close()
-                if closed then return end
+                if closed then return nil, "too many open handles" end
                 fileCount = fileCount - 1
                 closed = true
                 return fs.close(file)
             end
             function obj.seek(...)
-                if closed then return end
+                if closed then return nil, "too many open handles" end
                 return fs.seek(file, ...)
             end
 
