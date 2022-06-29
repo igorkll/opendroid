@@ -17,7 +17,8 @@ function fslink.link(fs, path, maxOpen, size)
         local file, err = fs.open(fslink.repath(path), mode)
         if file then
             local closed
-            
+            fileCount = fileCount + 1
+
             local obj = {}
             function obj.read(readCount)
                 if closed then return end
@@ -29,13 +30,16 @@ function fslink.link(fs, path, maxOpen, size)
             end
             function obj.close()
                 if closed then return end
-                fileCount = true
+                fileCount = fileCount - 1
+                closed = true
                 return fs.close(file)
             end
             function obj.seek(...)
                 if closed then return end
                 return fs.seek(file, ...)
             end
+
+            return obj
         end
         return nil, err
     end
