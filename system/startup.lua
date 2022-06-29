@@ -228,67 +228,53 @@ local function systemKey()
 end
 
 function sandbox.createSandbox(key)
-    local globals = {}
-
-    env.require = require
-
-    
+    local globals, env = {}, {}
 
     local createTime = computer.uptime()
-
-    env.app = {data = {}}
+    --в _ENV так же лежит и обьект самого приложения
+    --куда в будушем будет положены разные данные этого приложения, наример внутриняя файловая системма самого приложения
+    env.app = {}
+    env.app.data = {}
+    env.app.key = key
     function env.app.uptime()
         return computer.uptime() - createTime
     end
-    env.app.key = key
-
-    env.executeApp = executeApp
 
     if key == systemKey then --system
-        env.computer = computer
-        env.component = component
-        env.fatalError = fatalError
-
-        env.coroutine = coroutine
-        env.debug = debug
-        env.os = os
-
-        env.app.createTime = createTime
-        env.loadApp = loadApp
-        env.bootfs = bootfs
+        globals = _G --реальные глобалы
     elseif key == true then --sandbox
-        env.assert = assert
-        env.error = error
-        env.getmetatable = getmetatable
-        env.setmetatable = setmetatable
-        env.ipairs = ipairs
-        env.pairs = pairs
-        env.load = load
-        env.next = next
-        env.select = select
-        env.pcall = pcall
-        env.xpcall = xpcall
-        env.tonumber = tonumber
-        env.tostring = tostring
-        env.type = type
+        globals.assert = assert --глобалы в данном случаи такие же личьные как и _ENV
+        globals.error = error
+        globals.getmetatable = getmetatable
+        globals.setmetatable = setmetatable
+        globals.ipairs = ipairs
+        globals.pairs = pairs
+        globals.load = load
+        globals.next = next
+        globals.select = select
+        globals.pcall = pcall
+        globals.xpcall = xpcall
+        globals.tonumber = tonumber
+        globals.tostring = tostring
+        globals.type = type
 
-        env.rawequal = rawequal
-        env.rawget = rawget
-        env.rawset = rawset
-        env.rawlen = rawlen
+        globals.rawequal = rawequal
+        globals.rawget = rawget
+        globals.rawset = rawset
+        globals.rawlen = rawlen
 
-        env.table = table
-        env.unicode = unicode
-        env.string = string
+        globals.table = table
+        globals.unicode = unicode
+        globals.string = string
         --env.coroutine = coroutine
         --env.debug = debug
-        env.utf8 = utf8
-        env.math = math
+        globals.utf8 = utf8
+        globals.math = math
         --env.os = os
 
-        env._VERSION = _VERSION
-
-        env.require = function(name)
+        globals._VERSION = _VERSION
+        globals.executeApp = executeApp
+        globals.require = function(name)
             if name ~= "package" then
                 return tprotect.protect(require(name))
             end
@@ -302,6 +288,9 @@ function sandbox.createSandbox(key)
         error("this key is not found", 0)
     end
 
+    setmetatable(env, {__index = function(_, key)
+        return globals[key]
+    end})
     return env
 end
 
