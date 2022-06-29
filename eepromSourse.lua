@@ -119,12 +119,13 @@ function image.draw(img, x, y, customSet)
                 end
             end
             if not notSet then
+                local posX, posY = (drawPos + x) - 1, (cy + y) - 1
                 if customSet then
-                    local oldChar, oldFore, oldBack = gpu.get(x, y)
+                    local oldChar, oldFore, oldBack = gpu.get(posX, posY)
                     gpu.setForeground(oldFore)
-                    gpu.set((drawPos + x) - 1, (cy + y) - 1, oldChar)
+                    gpu.set(posX, posY, oldChar)
                 else
-                    gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+                    gpu.set(posX, posY, (" "):rep(drawSize))
                 end
             end
             drawPos = newDrawPos
@@ -302,11 +303,21 @@ while computer.uptime() - inTime < 1 do
             if bootdevice.exists"data/logs/bootErrors.log" then
                 local file = bootdevice.open("data/logs/bootErrors.log", "rb")
                 if file then
+                    local filedata = ""
+                    while 1 do
+                        local data = bootdevice.read(file, math.huge)
+                        if not data then break end
+                        filedata = filedata .. data
+                    end
+                    bootdevice.read(file)
+
                     strs = {}
                     while 1 do
                         local mainData, endFlag = ""
-                        while 1 do
-                            local data = bootdevice.read(file, 1)
+                        for i = 1, math.huge do
+                            local data = unicode.sub(filedata, 1, 1)
+                            filedata = unicode.sub(filedata, 1, unicode.len(filedata) - 1)
+                            
                             if not data then endFlag = 1 break end
                             if data == "\n" then break end
                             mainData = mainData .. data
