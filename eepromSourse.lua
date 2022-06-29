@@ -304,16 +304,16 @@ while computer.uptime() - inTime < 1 do
                 if file then
                     strs = {}
                     while 1 do
-                        local mainData = ""
+                        local mainData, endFlag = ""
                         while 1 do
                             local data = bootdevice.read(file, 1)
-                            if not data then goto exit end
+                            if not data then endFlag = 1 break end
                             if data == "\n" then break end
                             mainData = mainData .. data
                         end
-                        table.insert(strs, mainData)
+                        if #mainData > 0 then table.insert(strs, mainData) end
+                        if endFlag then break end
                     end
-                    ::exit::
                     bootdevice.close(file)
                 end
             end
@@ -323,14 +323,16 @@ while computer.uptime() - inTime < 1 do
                 clear()
 
                 for i, v in ipairs(strs) do
-                    local posY = i - num
+                    local posY = math.floor((ry / 2) + .5) + (i - num)
                     if posY > 0 and posY < ry then
-                        gpu.set(1, math.floor((ry / 2) + .5), strs[i])
+                        gpu.setForeground(colors.lightBlue)
+                        gpu.set(1, posY, strs[i])
                     end
                 end
 
                 drawImageInCenter(image.images.errorImage, 1)
             end
+            draw()
             while 1 do
                 local eventData = {computer.pullSignal()}
                 if eventData[1] == "key_down" then
