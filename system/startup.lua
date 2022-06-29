@@ -329,4 +329,7 @@ local function execute(name, key, ...)
         key = systemKey --принудительно даем права системмы
     end
     local env = sandbox.createSandbox(key)
+    local code = load()
+    
+    return pcall(code, ...)
 end
