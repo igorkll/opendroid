@@ -8,12 +8,13 @@ function fslink.repath(mainpath, path)
     return parts.sconcat(mainpath, path) or mainpath
 end
 
-function fslink.link(fs, path, maxOpen, size)
+function fslink.link(fs, path, maxOpen, size, readonly)
     local fileCount = 0
 
     local vfs = {}
 
     vfs.open = function(path, mode)
+        if readonly and mode and mode:sub(1, 1) == "w" then return nil, "filesystem is readonly" end
         if fileCount >= maxOpen then return nil, "bad file descriptor" end
         local file, err = fs.open(fslink.repath(path), mode)
         if file then
@@ -45,8 +46,32 @@ function fslink.link(fs, path, maxOpen, size)
         end
         return nil, err
     end
-    vfs.open = function(path, mode)
-        return fs.open(fslink.repath(path), mode)
+
+    vfs.list = function(path)
+        return fs.list(fslink.repath(path))
+    end
+    vfs.exists = function(path)
+        return fs.exists(fslink.repath(path))
+    end
+    vfs.isDirectory = function(path)
+        return fs.isDirectory(fslink.repath(path))
+    end
+
+    vfs.remove = function(path)
+        if readonly then return nil, "filesystem is readonly" end
+        return fs.remove(fslink.repath(path))
+    end
+    vfs.rename = function(path, path2)
+        if readonly then return nil, "filesystem is readonly" end
+        return fs.rename(fslink.repath(path), fslink.repath(path2))
+    end
+    vfs.makeDirectory = function(path)
+        if readonly then return nil, "filesystem is readonly" end
+        return fs.makeDirectory(fslink.repath(path))
+    end
+    vfs.rename = function(path, path2)
+        if readonly then return nil, "filesystem is readonly" end
+        return fs.rename(fslink.repath(path), fslink.repath(path2))
     end
 
     return vfs
