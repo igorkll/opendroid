@@ -242,7 +242,7 @@ end
 
 clear()
 drawImageInCenter(image.images.osLogo)
-computer.beep(1000, 0.2)
+computer.beep(150, 0.1)
 
 local deviceinfo, oldSlot, bootdevice = computer.getDeviceInfo(), math.huge
 for address in component.list("filesystem") do
@@ -296,11 +296,21 @@ while computer.uptime() - inTime < 1 do
     end
 end
 
-if not bootdevice.exists("/system/startup.lua") then
-    fatalError("System Error: not found file startup.lua")
+bootdevice.makeDirectory("data/logs")
+
+local function addErrToLog(err)
+    local file = bootdevice.open("data/logs/bootErrors.log", "ab")
+    if file then
+        bootdevice.write(err .. "\n")
+        bootdevice.close()
+    end
 end
 
-local file, buffer = assert(bootdevice.open("/system/startup.lua", "rb")), ""
+if not bootdevice.exists("system/startup.lua") then
+    --fatalError("System Error: not found file startup.lua")
+end
+
+local file, buffer = assert(bootdevice.open("system/startup.lua", "rb")), ""
 while true do
     local data = bootdevice.read(file, math.huge)
     if not data then break end
@@ -310,7 +320,7 @@ bootdevice.close(file)
 
 local code, err = load(buffer, "=startup")
 if not code then
-    fatalError("System Error: " .. err)
+    --fatalError("System Error: " .. err)
 end
 
 function computer.getBootAddress(address)

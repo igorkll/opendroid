@@ -3,6 +3,10 @@ local package = require("package")
 
 ----------------------------------
 
+local executeApp, loadApp
+
+----------------------------------
+
 --взято с форума computer craft - https://computercraft.ru/topic/2518-zaschitnik-tablits-tprotect/?tab=comments#comment-37169
 --надеюсь штучька надежная так как нужна она мне для сирьезных вешей
 
@@ -272,6 +276,8 @@ function sandbox.createSandbox(key)
     end
     env.app.key = key
 
+    env.executeApp = executeApp
+
     if key == systemKey then --system
         env.computer = computer
         env.component = component
@@ -282,6 +288,8 @@ function sandbox.createSandbox(key)
         env.os = os
 
         env.app.createTime = createTime
+
+        env.loadApp = loadApp
     elseif key == true then --sandbox
         env.require = function(name)
             if name ~= "package" then
@@ -332,7 +340,7 @@ end)
 
 ----------------------------------executing
 
-local function execute(name, key, ...)
+function loadApp(name, key)
     if isUnsupportedChars(name) then --системма антихакер
         return nil, "the name contains unsupported characters"
     end
@@ -367,5 +375,18 @@ local function execute(name, key, ...)
 
     local data = simpleIO.getFile(bootfs, path)
     local code = load(data, "=" .. path, nil, env)
+
+    return code
+end
+
+function executeApp(name, key, ...)
+    local code, err = loadApp(name, key)
+    if not code then
+        return nil, err
+    end
     return pcall(code, ...)
 end
+
+----------------------------------main
+
+assert(executeApp("shell"))
