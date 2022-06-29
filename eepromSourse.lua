@@ -96,7 +96,8 @@ package.loaded.colors = colors
 
 local image = {}
 
-function image.draw(img, x, y)
+function image.draw(img, x, y, customSet)
+    if not customSet then customSet = gpu.set end
     local oldColor = gpu.getBackground()
     for cy, str in ipairs(img) do
         local drawPos = 1
@@ -120,7 +121,7 @@ function image.draw(img, x, y)
                 end
             end
             if not notSet then
-                gpu.set((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
+                customSet((drawPos + x) - 1, (cy + y) - 1, (" "):rep(drawSize))
             end
             drawPos = newDrawPos
         end
@@ -180,7 +181,11 @@ end
 
 local function drawImageInCenter(img)
     local ix, iy = image.getSize(img)
-    image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)))
+    image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)), function(x, y, char)
+        local oldChar, oldFore, oldBack = gpu.get(x, y)
+        gpu.setForeground(oldFore)
+        gpu.set(x, y, oldChar)
+    end)
 end
 
 local function menu(label, strs, funcs, img)
@@ -188,9 +193,6 @@ local function menu(label, strs, funcs, img)
 
     local function draw()
         clear()
-        if img then
-            drawImageInCenter(img)
-        end
 
         gpu.setForeground(colors.red)
         gpu.setBackground(colors.black)
@@ -208,6 +210,10 @@ local function menu(label, strs, funcs, img)
                 gpu.setForeground(colors.lightBlue)
             end
             gpu.set(1, i + 2, v)
+        end
+
+        if img then
+            drawImageInCenter(img)
         end
     end
 
@@ -270,7 +276,7 @@ local inTime = computer.uptime()
 while computer.uptime() - inTime < 1 do
     local eventData = {computer.pullSignal(0.1)}
     if eventData[1] == "key_down" and eventData[4] == 56 then
-        menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "power down"},
+        menu("Opendroid Recovery", {"reboot system new", "wipe data/factory reset", "view recovery logs", "power down"},
         {function()
             computer.shutdown(true)
         end, function()
@@ -291,6 +297,8 @@ while computer.uptime() - inTime < 1 do
             end
 
             menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
+        end, function()
+            
         end, computer.shutdown}, image.images.recoveryLogo)
         break
     end
@@ -301,13 +309,14 @@ bootdevice.makeDirectory("data/logs")
 local function addErrToLog(err)
     local file = bootdevice.open("data/logs/bootErrors.log", "ab")
     if file then
-        bootdevice.write(err .. "\n")
-        bootdevice.close()
+        bootdevice.write(file, (err or "unknown error") .. "\n")
+        bootdevice.close(file)
     end
 end
 
 if not bootdevice.exists("system/startup.lua") then
-    --fatalError("System Error: not found file startup.lua")
+    addErrToLog("System Error: not found file startup.lua")
+    computer.shutdown(1)
 end
 
 local file, buffer = assert(bootdevice.open("system/startup.lua", "rb")), ""
@@ -320,11 +329,16 @@ bootdevice.close(file)
 
 local code, err = load(buffer, "=startup")
 if not code then
-    --fatalError("System Error: " .. err)
+    addErrToLog("System Syntax Error: " .. err)
+    computer.shutdown(1)
 end
 
 function computer.getBootAddress(address)
     return bootdevice.address
 end
 
-code()
+local ok, err = pcall(code)
+if not ok then
+    addErrToLog("System Error: " .. err)
+    computer.shutdown(1)
+end
