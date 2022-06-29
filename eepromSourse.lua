@@ -190,12 +190,12 @@ local function drawImageInCenter(img, customSet)
     image.draw(img, math.ceil((rx / 2) - (ix / 2)), math.ceil((ry / 2) - (iy / 2)), customSet)
 end
 
-local function menu(label, strs, funcs, img)
+local function menu(label, strs, funcs, img, customSet)
     local num = 1
 
     local function draw()
         clear()
-        if img then
+        if img and not customSet then
             drawImageInCenter(img)
         end
 
@@ -205,7 +205,8 @@ local function menu(label, strs, funcs, img)
         gpu.setForeground(colors.lightBlue)
         gpu.fill(1, 2, rx, 1, "─")
         gpu.fill(1, 3 + #strs, rx, 1, "─")
-        for i, v in ipairs(strs) do
+    
+        local function drawElement(i, v)
             if i == num then
                 gpu.setBackground(colors.lightBlue)
                 gpu.setForeground(colors.white)
@@ -215,6 +216,15 @@ local function menu(label, strs, funcs, img)
                 gpu.setForeground(colors.lightBlue)
             end
             gpu.set(1, i + 2, v)
+        end
+
+        for i, v in ipairs(strs) do
+            drawElement(i, v)
+        end
+
+        if img and customSet then
+            drawImageInCenter(img, 1)
+            drawElement(num, strs[num])
         end
     end
 
@@ -297,7 +307,7 @@ while computer.uptime() - inTime < 1 do
                 table.insert(funcs, false)
             end
 
-            menu("confirm factory reset", strs, funcs, image.images.recoveryLogo)
+            menu("confirm factory reset", strs, funcs, image.images.recoveryLogo, 1)
         end, function()
             local strs = {"no logs found"}
             if bootdevice.exists"data/logs/bootErrors.log" then
