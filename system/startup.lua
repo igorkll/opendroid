@@ -335,11 +335,6 @@ local function execute(name, key, ...)
         return nil, "the name contains unsupported characters"
     end
 
-    if name == "finder" then
-        key = systemKey --принудительно даем права системмы
-    end
-    local env = sandbox.createSandbox(key)
-
     local path
     local function checkPath(lpath)
         if bootfs.exists(lpath) then
@@ -347,11 +342,23 @@ local function execute(name, key, ...)
             return true
         end
     end
+    local isSystem = true
     if not checkPath(parts.concat("/system/apps", name, "main.lua")) then
+        isSystem = false
         if not checkPath(parts.concat("/data/apps", name, "main.lua")) then
             
         end
     end
+
+    if not path then
+        return nil, "application is not found"
+    end
+
+    if key == nil and isSystem then
+        key = systemKey
+    end
+
+    local env = sandbox.createSandbox(key)
 
     local data = simpleIO.getFile(bootfs, path)
     local code = load(data, "=" .. path, nil, env)
