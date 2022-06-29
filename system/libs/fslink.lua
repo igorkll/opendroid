@@ -56,6 +56,9 @@ function fslink.link(fs, path, maxOpen, size, readonly)
     vfs.isDirectory = function(path)
         return fs.isDirectory(fslink.repath(path))
     end
+    vfs.lastModified = function(path)
+        return fs.lastModified(fslink.repath(path))
+    end
 
     vfs.remove = function(path)
         if readonly then return nil, "filesystem is readonly" end
